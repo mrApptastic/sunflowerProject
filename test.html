@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+	<textarea style="width: 100%"></textarea><br/>
+	<canvas style="background: hotpink"></canvas>
+	<input style="display: none;" type="file" />
+</head>
+<body>
+
+<script>
+const mrSunflower = function (canvas, fileUpload, textEditor) {
+	const mrS = this;
+	mrS.ctx = document.querySelector(canvas).getContext("2d");
+	mrS.width = document.querySelector(canvas).width;
+	mrS.height = document.querySelector(canvas).height;
+	mrS.changePixel = (x, y, w, h) => {
+		const imageData = mrS.ctx.getImageData(x, y, w, h);
+
+		imageData.data[0] = 0; 
+		imageData.data[1] = 0; 
+		imageData.data[2] = 255; 
+
+		mrS.ctx.putImageData(imageData, x, y);
+	};
+	mrS.convertToBinary = (text) => {
+		let binary = "";
+		
+		for (let i = 0; i < text.length; i++) {
+			let binBlock = text.charCodeAt(i).toString(2);
+			
+			// while (binBlock.length < 8) {
+			// 	binBlock = "0" + binBlock;
+			//}
+			
+			binary += binBlock.padStart(8, "0");
+		}
+		
+		return binary;
+	};
+	mrS.convertFromBinary = (binary) => {
+		let unbinary = "";
+		
+		for (let i = 0; i < binary.length; i += 8) {
+			let unBinBlock = binary.substring(i, i + 8);
+
+			unbinary += String.fromCharCode(parseInt(unBinBlock, 2));
+			
+		}
+		
+		return unbinary;
+	};
+	document.querySelector(textEditor).onkeyup = () => {
+		const text = document.querySelector(textEditor).value;
+		let binary = mrS.convertToBinary(text);
+		console.log(binary);
+		let unbinary = mrS.convertFromBinary(binary);
+		console.log(unbinary);
+	};
+	document.querySelector(canvas).onclick = () => {
+		document.querySelector(fileUpload).click();
+	};
+	document.querySelector(fileUpload).onchange = (e) => {
+		const huhu = new Image();
+		const file = e?.target?.files[0];		
+		if (file) {
+		    var reader = new FileReader();
+			reader.onload = function (e) {
+			  huhu.src = e.target.result;
+			  mrS.ctx.clearRect(0, 0, mrS.width, mrS.height);
+			  mrS.ctx.font = '30px Arial';
+			  mrS.ctx.fillStyle = '#FFFFFF';
+			  mrS.ctx.fillText('Loading Image...', 30, 50);
+			  setTimeout(() => {
+				document.querySelector(canvas).width = huhu.width;
+				document.querySelector(canvas).height = huhu.height;
+				mrS.width = huhu.width;
+				mrS.height = huhu.height;
+				mrS.ctx.clearRect(0, 0, mrS.width, mrS.height);
+				mrS.ctx.drawImage(huhu, 0, 0, huhu.width, huhu.height);
+			  }, 1000);
+			};
+			reader.readAsDataURL(file);
+			this.imageLoaded = true;
+		}
+	};
+};
+
+const ib = new mrSunflower("canvas", "input", "textarea");
+</script>
+</body>
+</html>
