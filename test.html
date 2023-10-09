@@ -13,12 +13,35 @@ const mrSunflower = function (canvas, fileUpload, textEditor) {
 	mrS.ctx = document.querySelector(canvas).getContext("2d");
 	mrS.width = document.querySelector(canvas).width;
 	mrS.height = document.querySelector(canvas).height;
-	mrS.changePixel = (x, y, w, h) => {
-		const imageData = mrS.ctx.getImageData(x, y, w, h);
+	mrS.readFromPixel = (x, y) => {
+		const imageData = mrS.ctx.getImageData(x, y, 1, 1);
 
-		imageData.data[0] = 0; 
-		imageData.data[1] = 0; 
-		imageData.data[2] = 255; 
+		const red = imageData.data[0];
+		const green = imageData.data[1];
+		const blue = imageData.data[2];
+		
+		const rgbValue = (red << 16) | (green << 8) | blue;
+		
+		let binaryString = rgbValue.toString(2).padStart(24, '0');
+		
+		return binaryString.charAt[0];
+	}
+	mrS.writeToPixel = (changeValue, x, y) => {
+		const imageData = mrS.ctx.getImageData(x, y, 1, 1);
+
+		const red = imageData.data[0];
+		const green = imageData.data[1];
+		const blue = imageData.data[2];
+		
+		const rgbValue = (red << 16) | (green << 8) | blue;
+		
+		let binaryString = rgbValue.toString(2).padStart(24, '0');
+		
+		binaryString.charAt[0] = changeValue;
+		
+		imageData.data[0] = parseInt(binaryString.slice(0, 8), 2);
+		imageData.data[1] = parseInt(binaryString.slice(8, 16), 2);
+		imageData.data[2] = parseInt(binaryString.slice(16, 24), 2);
 
 		mrS.ctx.putImageData(imageData, x, y);
 	};
@@ -27,11 +50,7 @@ const mrSunflower = function (canvas, fileUpload, textEditor) {
 		
 		for (let i = 0; i < text.length; i++) {
 			let binBlock = text.charCodeAt(i).toString(2);
-			
-			// while (binBlock.length < 8) {
-			// 	binBlock = "0" + binBlock;
-			//}
-			
+	
 			binary += binBlock.padStart(8, "0");
 		}
 		
@@ -49,9 +68,13 @@ const mrSunflower = function (canvas, fileUpload, textEditor) {
 		
 		return unbinary;
 	};
+	mrS.implementMessage = (text) => {
+		const binary = mrS.convertToBinary(text);
+	};
 	document.querySelector(textEditor).onkeyup = () => {
 		const text = document.querySelector(textEditor).value;
 		let binary = mrS.convertToBinary(text);
+		
 		console.log(binary);
 		let unbinary = mrS.convertFromBinary(binary);
 		console.log(unbinary);
